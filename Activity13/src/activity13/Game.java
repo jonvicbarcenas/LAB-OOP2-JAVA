@@ -21,6 +21,8 @@ public class Game extends javax.swing.JFrame {
     int playerChoice = 0; // 0 question mark, 1 rock, 2 paper, 3 scissor 
     int compChoice = 0;
     int rc = 1;
+    int playerWins = 0;
+    int computerWins = 0;
     
 
     /**
@@ -256,7 +258,17 @@ public class Game extends javax.swing.JFrame {
             compHP =100;
             prgPlayerLife.setValue(playerHP);
             prgComputerLife.setValue(compHP);
+            
+            if(playerHP > compHP){
+                playerWins++;
+                lblPlayerWins.setText(String.valueOf(playerWins));
+            }else{
+                computerWins++;
+                lblCompWins.setText(String.valueOf(computerWins));
+            }
         }
+       
+        
     }
     
     
