@@ -248,6 +248,17 @@ public class Game extends javax.swing.JFrame {
         lblVersus.setIcon(new ImageIcon(img));
     }
     
+    private void roundCounter(){
+        if(playerHP <= 0 || compHP <= 0){
+            rc++;
+            
+            playerHP = 100;
+            compHP =100;
+            prgPlayerLife.setValue(playerHP);
+            prgComputerLife.setValue(compHP);
+        }
+    }
+    
     
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         // TODO add your handling code here:
@@ -349,7 +360,7 @@ public class Game extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "It's a tie!", "Jack n' Poy Game!", JOptionPane.WARNING_MESSAGE);
         }
         
-        rc++;
+        roundCounter();
         lblRound.setText(String.valueOf(rc));
     }//GEN-LAST:event_btnFightActionPerformed
 
@@ -386,6 +397,8 @@ public class Game extends javax.swing.JFrame {
             public void run() {
                 new Game().setVisible(true);
             }
+            
+            
         });
     }
 
