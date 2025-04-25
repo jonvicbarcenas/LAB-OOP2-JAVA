@@ -55,8 +55,8 @@ public class StudentModule extends javax.swing.JFrame {
             for(Students user: students){
                 Object[] row = new Object[4];
                 row[0] = user.getId();
-                row[1] = user.getLname();
-                row[2] = user.getFname();
+                row[1] = user.getFname();
+                row[2] = user.getLname();
                 row[3] = user.getAge();
                 
                 model2.addRow(row);
@@ -64,6 +64,23 @@ public class StudentModule extends javax.swing.JFrame {
         }catch(ClassNotFoundException | SQLException ex){
             Logger.getLogger(StudentModule.class.getName()).log(Level.SEVERE,null,ex);
         }
+    }
+    
+    private void clear(){
+        txtID.setText("");
+        txtLastName.setText("");
+        txtFirstName.setText("");
+        txtAge.setText("");
+    }
+    
+     //method to show an info alert
+    public void alert(String msg) {
+        JOptionPane.showMessageDialog(rootPane, msg);
+    }
+ 
+ //method to show an error alert
+    public void alert(String msg, String title) {
+        JOptionPane.showMessageDialog(rootPane, msg, title, JOptionPane.ERROR_MESSAGE);
     }
 
 
@@ -114,11 +131,17 @@ public class StudentModule extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tblStudents.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblStudentsMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblStudents);
         if (tblStudents.getColumnModel().getColumnCount() > 0) {
             tblStudents.getColumnModel().getColumn(0).setResizable(false);
             tblStudents.getColumnModel().getColumn(1).setResizable(false);
             tblStudents.getColumnModel().getColumn(2).setResizable(false);
+            tblStudents.getColumnModel().getColumn(3).setResizable(false);
         }
 
         lblID.setText("Student ID");
@@ -129,9 +152,16 @@ public class StudentModule extends javax.swing.JFrame {
 
         lblAge.setText("Age");
 
+        txtID.setEditable(false);
         txtID.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtIDActionPerformed(evt);
+            }
+        });
+
+        txtLastName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtLastNameActionPerformed(evt);
             }
         });
 
@@ -143,10 +173,25 @@ public class StudentModule extends javax.swing.JFrame {
         });
 
         btnUpdate.setText("Update");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
 
         btnDelete.setText("Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -221,8 +266,152 @@ public class StudentModule extends javax.swing.JFrame {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
+        String fname = txtFirstName.getText().trim(); //trim() method removes whitespace from both ends of a string.
+        String lname = txtLastName.getText().trim();
+        String id = txtID.getText().trim();
+        String age = txtAge.getText().trim();
+        if (!fname.isEmpty() && !lname.isEmpty()) {
+            try { //try catch to check if database in connected
+                Class.forName("com.mysql.cj.jdbc.Driver"); //jdbcconnector
+                con = DriverManager.getConnection("jdbc:mysql://localhost:3306/oopdb", "root", ""); //localhost mysql port, database name, username and password
+                String sql = "select * from tblstudents where lastname='" + lname + "'"; //query to check last name to the database records
+                st = con.createStatement(); //create connection
+                ResultSet rs = st.executeQuery(sql); //executes the sql
+           
+                if(rs.next()==true){ //checks if the last name already exist in the database table
+                    alert("This student record already exist", "Insert error");      
+                }
+                else{
+                    addStudent(id, lname, fname, age); //calls saveUsermethod to save new record to the database             
+                    fetch(); //calls fetch method to update the GUI table
+                    alert("Record has been successfully added.");
+                }
+ 
+            } catch (ClassNotFoundException | SQLException ex) {
+                Logger.getLogger(StudentModule.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            alert("There is nothing to update :(","No row selected");
+        }
     }//GEN-LAST:event_btnAddActionPerformed
 
+    public void addStudent(String id, String lname, String fname, String age) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/oopdb", "root", "");
+            String sql = "INSERT INTO `tblstudents`(`lastname`, `firstname`, `age`) "
+                    + "VALUES ('" + lname + "','" + fname + "','" + age + "')";
+            st = con.createStatement();
+            st.execute(sql);
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(StudentModule.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        fetch();
+    }
+    
+    private void tblStudentsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblStudentsMouseClicked
+        // TODO add your handling code here:
+        int i = tblStudents.getSelectedRow();
+        TableModel model = tblStudents.getModel();
+        txtID.setText(model.getValueAt(i,0).toString());
+        txtLastName.setText(model.getValueAt(i,1).toString());
+        txtFirstName.setText(model.getValueAt(i,2).toString());
+        txtAge.setText(model.getValueAt(i,3).toString());
+    }//GEN-LAST:event_tblStudentsMouseClicked
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        // TODO add your handling code here:
+        int i = tblStudents.getSelectedRow();
+        if (i >= 0) {
+            int option = JOptionPane.showConfirmDialog(rootPane,
+                    "Are you sure you want to Delete?", "Delete confirmation", JOptionPane.YES_NO_OPTION);
+            if (option == 0) {
+                TableModel model = tblStudents.getModel();
+ 
+                String id = model.getValueAt(i, 0).toString();
+                if (tblStudents.getSelectedRows().length == 1) {
+                    delete(id);
+                    DefaultTableModel model1 = (DefaultTableModel) tblStudents.getModel();
+                    model1.setRowCount(0);
+                    fetch();
+                    clear();
+                }
+            }
+        } else {
+            alert("Please select a row to delete");
+        }
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        // TODO add your handling code here:
+        String fname = txtFirstName.getText().trim();
+        String lname = txtLastName.getText().trim();
+        String id = txtID.getText().trim();
+        String age = txtAge.getText().trim();
+       
+        if (!fname.isEmpty() && !lname.isEmpty() && !id.isEmpty()) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                con = DriverManager.getConnection("jdbc:mysql://localhost:3306/oopdb", "root", "");
+                String sql = "select * from tblstudents where id='" + id + "'";
+                st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql);
+               
+                if(rs.next()==true){  
+                    update(id, lname, fname, age);
+                    DefaultTableModel model = (DefaultTableModel) tblStudents.getModel();
+                    model.setRowCount(0);                  
+                    fetch();
+                    alert("Update was successful");
+                   
+                } else {
+                    alert("There is no such student", "Update error");
+                    clear();
+                }
+ 
+            } catch (ClassNotFoundException | SQLException ex) {
+                Logger.getLogger(StudentModule.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            alert("There is nothing to update :(","No row selected");
+        }
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void txtLastNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtLastNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLastNameActionPerformed
+
+    public void update(String id, String lname, String fname, String age) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/oopdb", "root", "");
+            String sql = "UPDATE `tblstudents`SET lastname='" + lname + "', firstname='" + fname + "', age='" + age + "' WHERE id='" + id + "'";
+            st = con.createStatement();
+            st.execute(sql);
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(StudentModule.class.getName()).log(Level.SEVERE, null, ex);
+        }
+         fetch();
+    }
+    
+    public void delete(String id) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/oopdb", "root", "");
+            String sql = "DELETE FROM `tblstudents` WHERE id='" + id + "'";
+            st = con.createStatement();
+            st.execute(sql);
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(StudentModule.class.getName()).log(Level.SEVERE, null, ex);
+            //allows you to get an instance of a logger and then log a message with the given Level (severe) containing the exception's (ex) stacktrace.
+        }
+        fetch();
+    }
     /**
      * @param args the command line arguments
      */
