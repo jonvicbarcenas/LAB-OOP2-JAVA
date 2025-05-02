@@ -9,12 +9,13 @@ package javadb;
  * @author L12X17W07
  */
 public class Students {
-    String id, fname, lname, age;
+    String id, fname, lname, mname, age;
     
-    public Students(String id, String fname, String lname, String age){
+    public Students(String id, String fname, String lname, String mname, String age){
         this.fname = fname;
         this.lname = lname;
         this.id = id;
+        this.mname = mname;
         this.age = age;
     }
     
@@ -28,6 +29,10 @@ public class Students {
     
     public String getId(){
         return this.id;
+    }
+    
+     public String getMname(){
+        return this.mname;
     }
 
     public String getAge(){
